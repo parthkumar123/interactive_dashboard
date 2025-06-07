@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import WidgetWrapper from './WidgetWrapper';
 import { mockData } from '../../services/mockData';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { useDashboardStore } from '../../contexts/DashboardStoreContext';
 
 // Dynamically import ApexCharts to avoid SSR issues
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
-export default function ChartWidget({ widget }) {
+export default function ChartWidget({ widget, onResize }) {
     const [chartData, setChartData] = useState([]);
     const [loading, setLoading] = useState(true);
     const { updateWidget } = useDashboardStore();
@@ -44,9 +44,15 @@ export default function ChartWidget({ widget }) {
     }, [widget.title]);
 
     const renderBarChart = () => {
+        // Safety check - if chartData is undefined or empty, return null
+        if (!chartData || !chartData.length) {
+            return <div className="h-full flex items-center justify-center text-gray-500">No data available</div>;
+        }
+
         const options = {
             chart: {
                 type: 'bar',
+                foreColor: '#2d3748', // Improved text visibility
                 toolbar: {
                     show: false
                 }
@@ -63,11 +69,25 @@ export default function ChartWidget({ widget }) {
                 enabled: false
             },
             xaxis: {
-                categories: chartData.map(item => item.month),
+                categories: chartData.map(item => item.month || ''),
+                labels: {
+                    style: {
+                        colors: '#2d3748',
+                        fontSize: '12px'
+                    }
+                }
             },
             yaxis: {
                 title: {
-                    text: 'Revenue ($)'
+                    text: 'Revenue ($)',
+                    style: {
+                        color: '#2d3748'
+                    }
+                },
+                labels: {
+                    style: {
+                        colors: '#2d3748'
+                    }
                 }
             },
             fill: {
@@ -84,7 +104,7 @@ export default function ChartWidget({ widget }) {
 
         const series = [{
             name: 'Revenue',
-            data: chartData.map(item => item.revenue)
+            data: chartData.map(item => item.revenue || 0)
         }];
 
         return (
@@ -93,9 +113,15 @@ export default function ChartWidget({ widget }) {
     };
 
     const renderLineChart = () => {
+        // Safety check - if chartData is undefined or empty, return null
+        if (!chartData || !chartData.length) {
+            return <div className="h-full flex items-center justify-center text-gray-500">No data available</div>;
+        }
+
         const options = {
             chart: {
                 type: 'line',
+                foreColor: '#2d3748', // Improved text visibility
                 toolbar: {
                     show: false
                 },
@@ -107,23 +133,40 @@ export default function ChartWidget({ widget }) {
                 curve: 'smooth',
                 width: 3,
             },
-            colors: ['#10B981'],
+            colors: ['#3B82F6'], // More visible blue color
             grid: {
                 borderColor: '#f1f1f1',
             },
             xaxis: {
                 categories: chartData.map(item => {
-                    const date = new Date(item.date);
-                    return `${date.getMonth() + 1}/${date.getDate()}`;
+                    if (!item.date) return '';
+                    try {
+                        const date = new Date(item.date);
+                        return `${date.getMonth() + 1}/${date.getDate()}`;
+                    } catch (e) {
+                        return '';
+                    }
                 }),
                 labels: {
                     rotate: -45,
                     rotateAlways: false,
+                    style: {
+                        colors: '#2d3748',
+                        fontSize: '12px'
+                    }
                 }
             },
             yaxis: {
                 title: {
-                    text: 'Sales'
+                    text: 'Sales',
+                    style: {
+                        color: '#2d3748'
+                    }
+                },
+                labels: {
+                    style: {
+                        colors: '#2d3748'
+                    }
                 }
             },
             markers: {
@@ -138,7 +181,7 @@ export default function ChartWidget({ widget }) {
 
         const series = [{
             name: 'Sales',
-            data: chartData.map(item => item.sales)
+            data: chartData.map(item => item.sales || 0)
         }];
 
         return (
@@ -147,17 +190,28 @@ export default function ChartWidget({ widget }) {
     };
 
     const renderPieChart = () => {
+        // Safety check - if chartData is undefined or empty, return null
+        if (!chartData || !chartData.length) {
+            return <div className="h-full flex items-center justify-center text-gray-500">No data available</div>;
+        }
+
         const options = {
             chart: {
                 type: 'pie',
+                foreColor: '#2d3748', // Improved text visibility
                 toolbar: {
                     show: false
                 }
             },
-            colors: ['#4F46E5', '#10B981', '#F59E0B'],
-            labels: chartData.map(item => item.category),
+            colors: ['#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#EC4899'],
+            labels: chartData.map(item => item.category || 'Unknown'),
             legend: {
-                position: 'bottom'
+                position: 'bottom',
+                fontSize: '14px',
+                fontFamily: 'Inter, sans-serif',
+                labels: {
+                    colors: '#2d3748'  // Dark enough to be visible
+                },
             },
             responsive: [{
                 breakpoint: 480,
@@ -179,7 +233,7 @@ export default function ChartWidget({ widget }) {
             }
         };
 
-        const series = chartData.map(item => item.value);
+        const series = chartData.map(item => item.value || 0);
 
         return (
             <ReactApexChart options={options} series={series} type="pie" height="100%" />

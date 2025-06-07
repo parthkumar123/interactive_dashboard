@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 const defaultWidgets = [
     {
@@ -67,9 +67,10 @@ const defaultWidgets = [
     },
 ];
 
-export const useDashboardStore = create(
+export const createDashboardStore = (userId = 'default') => create(
     persist(
         (set) => ({
+            userId,
             widgets: defaultWidgets,
             layouts: { lg: defaultWidgets },
 
@@ -147,8 +148,14 @@ export const useDashboardStore = create(
             })),
         }),
         {
-            name: 'dashboard-storage',
-            getStorage: () => localStorage,
+            name: `dashboard-storage-${userId}`,
+            storage: createJSONStorage(() => localStorage),
+            partialize: (state) => ({
+                widgets: state.widgets,
+                layouts: state.layouts,
+                userId: state.userId
+            }),
+            version: 1,
         }
     )
 );

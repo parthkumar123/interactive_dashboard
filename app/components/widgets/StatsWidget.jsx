@@ -5,7 +5,7 @@ import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import { mockData } from '../../services/mockData';
 import WidgetWrapper from './WidgetWrapper';
 
-export default function StatsWidget({ widget }) {
+export default function StatsWidget({ widget, onResize }) {
     const [stats, setStats] = useState([]);
     const [loading, setLoading] = useState(true);
 

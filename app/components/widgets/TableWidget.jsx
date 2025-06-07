@@ -12,7 +12,7 @@ import { ArrowDownIcon, ArrowUpIcon, ArrowsUpDownIcon } from '@heroicons/react/2
 import { mockData } from '../../services/mockData';
 import WidgetWrapper from './WidgetWrapper';
 
-export default function TableWidget({ widget }) {
+export default function TableWidget({ widget, onResize }) {
     const [data, setData] = useState([]);
     const [sorting, setSorting] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -147,9 +147,9 @@ export default function TableWidget({ widget }) {
                                                 {flexRender(header.column.columnDef.header, header.getContext())}
                                                 <span className="ml-2">
                                                     {{
-                                                        asc: <ArrowUpIcon className="h-4 w-4" />,
-                                                        desc: <ArrowDownIcon className="h-4 w-4" />,
-                                                        false: <ArrowsUpDownIcon className="h-4 w-4 text-gray-300" />,
+                                                        asc: <ArrowUpIcon className="h-4 w-4 text-blue-600" />,
+                                                        desc: <ArrowDownIcon className="h-4 w-4 text-blue-600" />,
+                                                        false: <ArrowsUpDownIcon className="h-4 w-4 text-gray-500" />,
                                                     }[header.column.getIsSorted() || false]}
                                                 </span>
                                             </div>
@@ -162,7 +162,7 @@ export default function TableWidget({ widget }) {
                             {table.getRowModel().rows.map(row => (
                                 <tr key={row.id} className="hover:bg-gray-50">
                                     {row.getVisibleCells().map(cell => (
-                                        <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
                                     ))}
